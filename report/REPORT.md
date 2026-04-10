@@ -1,8 +1,8 @@
 # Báo Cáo Lab 7: Embedding & Vector Store
 
-**Họ tên:** [Tên sinh viên]
-**Nhóm:** [Tên nhóm]
-**Ngày:** [Ngày nộp]
+**Họ tên:** Phạm Trần Thanh Lâm
+**Nhóm:** C4
+**Ngày:** 10/04/2026
 
 ---
 
@@ -12,28 +12,32 @@
 
 **High cosine similarity nghĩa là gì?**
 > *Viết 1-2 câu:*
+Nghĩa là 2 câu/từ tương đồng về ngữ nghĩa
 
 **Ví dụ HIGH similarity:**
-- Sentence A:
-- Sentence B:
-- Tại sao tương đồng:
+- Sentence A: "How to reset my password?"
+- Sentence B: "I forgot my password, how can I reset it?"
+- Tại sao tương đồng: Cả 2 câu đều nói về việc quên mật khẩu và cách reset nó
 
 **Ví dụ LOW similarity:**
-- Sentence A:
-- Sentence B:
-- Tại sao khác:
+- Sentence A: "How to reset my password?"
+- Sentence B: "What is the capital of France?"
+- Tại sao khác: Cả 2 câu không có liên quan gì đến nhau
 
 **Tại sao cosine similarity được ưu tiên hơn Euclidean distance cho text embeddings?**
-> *Viết 1-2 câu:*
+> *Viết 1-2 câu:* Vì cosine similarity không phụ thuộc vào độ dài của vector, chỉ quan tâm đến góc giữa chúng. Các vector cùng hướng nhưng khác độ lớn vẫn có thể có ý nghĩa tương đồng, điều này ảnh hưởng khi sử dụng Euclidian distance.
 
 ### Chunking Math (Ex 1.2)
 
 **Document 10,000 ký tự, chunk_size=500, overlap=50. Bao nhiêu chunks?**
 > *Trình bày phép tính:*
-> *Đáp án:*
+> *Đáp án:*   23 chunks
+Steps=500-50=450  
+Chunks=1+[(10000-500)/450]=1+9500/450=1+21.11=22.11=>23 chunks
+
 
 **Nếu overlap tăng lên 100, chunk count thay đổi thế nào? Tại sao muốn overlap nhiều hơn?**
-> *Viết 1-2 câu:*
+> Khi overlap tăng lên 100, số lượng chunks sẽ **tăng lên**. Điều này là do "bước nhảy" (stride) giữa các chunk (`chunk_size - overlap`) sẽ nhỏ lại (từ 450 xuống còn 400), dẫn đến việc cần nhiều chunk hơn để bao phủ cùng một lượng văn bản. Chúng ta muốn overlap nhiều hơn để đảm bảo các thông tin quan trọng nằm ở ranh giới giữa hai chunk không bị mất ngữ cảnh (context), giúp mô hình LLM có cái nhìn toàn diện hơn về thông tin bị cắt đôi.
 
 ---
 
@@ -41,27 +45,31 @@
 
 ### Domain & Lý Do Chọn
 
-**Domain:** [ví dụ: Customer support FAQ, Vietnamese law, cooking recipes, ...]
-
+**Domain:** 
+Luật/Quy tắc thương mại quốc tế — Incoterms 2020
 **Tại sao nhóm chọn domain này?**
-> *Viết 2-3 câu:*
+> *Viết 2-3 câu:* Incoterms 2020 là bộ quy tắc có tính pháp lý cao, nội dung dài và cấu trúc rõ theo điều khoản/rule nên phù hợp để thử retrieval theo ngữ cảnh. Domain này giúp nhóm đánh giá tốt các bài toán truy xuất như phân biệt trách nhiệm người bán/người mua, điểm chuyển rủi ro và phân bổ chi phí.
 
 ### Data Inventory
 
 | # | Tên tài liệu | Nguồn | Số ký tự | Metadata đã gán |
 |---|--------------|-------|----------|-----------------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-
+| 1 | incoterms_intro.md | ICC Publication (extracted from incorterm.md) | ~1,400 | source=icc, domain=incoterms, lang=en, section=introduction |
+| 2 | incoterms_any_mode_rules.md | ICC Publication (extracted from incorterm.md) | ~1,600 | source=icc, domain=incoterms, lang=en, section=any_mode |
+| 3 | incoterms_sea_rules.md | ICC Publication (extracted from incorterm.md) | ~1,200 | source=icc, domain=incoterms, lang=en, section=sea_inland |
+| 4 | incoterms_obligations_ab.md | ICC Publication (extracted from incorterm.md) | ~1,000 | source=icc, domain=incoterms, lang=en, section=obligations |
+| 5 | incoterms_risk_cost_focus.md | ICC Publication (extracted from incorterm.md) | ~1,300 | source=icc, domain=incoterms, lang=en, section=risk_cost |
 ### Metadata Schema
 
 | Trường metadata | Kiểu | Ví dụ giá trị | Tại sao hữu ích cho retrieval? |
 |----------------|------|---------------|-------------------------------|
-| | | | |
-| | | | |
+| source | string | icc / team_notes | Truy vết nguồn pháp lý của thông tin |
+| domain | string | incoterms | Lọc đúng domain khi chạy query nhóm |
+| section | string | introduction / any_mode / sea_inland | Filter theo vùng kiến thức trong tài liệu |
+| rule | string | EXW / FCA / FOB / CIF / DDP | Tăng precision cho query theo từng điều kiện giao hàng |
+| lang | string | en | Đồng bộ ngôn ngữ văn bản để giảm nhiễu |
+| doc_id | string | incorterm_main | Hỗ trợ quản lý/xóa tài liệu |
+
 
 ---
 
@@ -69,46 +77,43 @@
 
 ### Baseline Analysis
 
-Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
+Chạy `ChunkingStrategyComparator().compare()` trên tài liệu chính:
 
 | Tài liệu | Strategy | Chunk Count | Avg Length | Preserves Context? |
 |-----------|----------|-------------|------------|-------------------|
-| | FixedSizeChunker (`fixed_size`) | | | |
-| | SentenceChunker (`by_sentences`) | | | |
-| | RecursiveChunker (`recursive`) | | | |
+| incoterms_any_mode_rules.md | FixedSizeChunker (`fixed_size`) | 9 | 187.2 | Trung bình (dễ cắt giữa câu) |
+| incoterms_any_mode_rules.md | SentenceChunker (`by_sentences`) | 4 | 319.0 | Tốt (giữ nguyên câu văn) |
+| incoterms_any_mode_rules.md | RecursiveChunker (`recursive`) | 9 | 142.8 | Rất tốt (giữ theo heading) |
 
 ### Strategy Của Tôi
 
-**Loại:** [FixedSizeChunker / SentenceChunker / RecursiveChunker / custom strategy]
+**Loại:** FixedSizeChunker (với overlap thấp)
 
 **Mô tả cách hoạt động:**
-> *Viết 3-4 câu: strategy chunk thế nào? Dựa trên dấu hiệu gì?*
+> Chiến lược này sử dụng class `FixedSizeChunker` với `chunk_size=200` và `overlap=20`. Văn bản được cắt thành các đoạn có độ dài 200 ký tự liên tiếp nhau. Khoảng overlap 20 ký tự được thêm vào giữa các chunk để đảm bảo các từ khóa ở ranh giới giữa hai đoạn không bị mất hoàn toàn ngữ cảnh, giúp vector search vẫn có thể tìm thấy dữ liệu nếu từ khóa rơi vào điểm cắt.
 
 **Tại sao tôi chọn strategy này cho domain nhóm?**
-> *Viết 2-3 câu: domain có pattern gì mà strategy khai thác?*
-
-**Code snippet (nếu custom):**
-```python
-# Paste implementation here
-```
+> Với tài liệu Incoterms, các điều khoản và định nghĩa thường súc tích. Việc sử dụng FixedSize giúp quá trình indexing diễn ra nhanh nhất có thể. Mặc dù Recursive là phương án tối ưu về mặt logic, nhưng FixedSize với overlap vừa phải vẫn đảm bảo hiệu suất truy xuất (retrieval) ổn định cho các câu hỏi ngắn về trách nhiệm người bán/mua mà không tốn công sức cấu hình separators phức tạp.
 
 ### So Sánh: Strategy của tôi vs Baseline
 
 | Tài liệu | Strategy | Chunk Count | Avg Length | Retrieval Quality? |
 |-----------|----------|-------------|------------|--------------------|
-| | best baseline | | | |
-| | **của tôi** | | | |
+| incoterms_any_mode_rules.md | best baseline (Recursive) | 9 | 142.8 | 9.0/10 |
+| incoterms_any_mode_rules.md | **của tôi** (FixedSize + overlap) | 9 | 187.2 | 8.0/10 |
 
 ### So Sánh Với Thành Viên Khác
 
 | Thành viên | Strategy | Retrieval Score (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
-| Tôi | | | | |
-| [Tên] | | | | |
-| [Tên] | | | | |
+| Tôi (Lâm) | FixedSize + overlap thấp | 8.0 | Tốc độ xử lý nhanh, ổn định | Dễ mất ngữ cảnh ở ranh giới chunk |
+| Hiệp | Recursive + metadata filter | 9.1 | Context mạch lạc, chính xác cao | Tốn thời gian tune separator |
+| Dũng | FixedSize + overlap cao | 7.8 | Đơn giản, bao phủ từ khóa tốt | Nhiều dữ liệu dư thừa |
+| Cường | SentenceChunker | 8.5 | Câu văn tự nhiên, dễ đọc | Khó xử lý các bảng biểu dài |
 
 **Strategy nào tốt nhất cho domain này? Tại sao?**
-> *Viết 2-3 câu:*
+> Qua so sánh, lược đồ **RecursiveChunker kết hợp Metadata Filter** của Hiệp là tốt nhất cho domain Incoterms. Lý do là vì tài liệu pháp lý này có cấu trúc phân tầng cực kỳ chặt chẽ (Rule -> Gia đình quy tắc -> Điều khoản A/B). Việc dùng Recursive giúp giữ trọn vẹn các block kiến thức theo heading, trong khi metadata filter giúp thu hẹp phạm vi tìm kiếm vào đúng Rule cần tra cứu (ví dụ chỉ tìm trong EXW), loại bỏ hoàn toàn các kết quả nhiễu từ các Rule khác.
+
 
 ---
 
@@ -119,31 +124,81 @@ Giải thích cách tiếp cận của bạn khi implement các phần chính tr
 ### Chunking Functions
 
 **`SentenceChunker.chunk`** — approach:
-> *Viết 2-3 câu: dùng regex gì để detect sentence? Xử lý edge case nào?*
+> Sử dụng regex `re.split(r'(?<=[.!?])\s+', text)` tận dụng positive lookbehind để tách câu tại các khoảng trắng theo sau dấu câu kết thúc (.!?) để giữ lại các dấu chấm câu thay vì xóa bỏ chúng. Sau đó lặp qua list các câu, ghép lại các câu liền kề theo số lượng `max_sentences_per_chunk` và `strip()` khoảng trắng thừa trong mỗi chunk để có output gọn gàng.
 
 **`RecursiveChunker.chunk` / `_split`** — approach:
-> *Viết 2-3 câu: algorithm hoạt động thế nào? Base case là gì?*
+> Giải thuật hoạt động bằng cách nhận văn bản và mảng các ký tự phân cách (separators) sắp xếp theo mức độ ưu tiên từ lớn đến nhỏ (e.g. `\n\n`, `\n`, `. `). Nó thử `split` text bằng separator hiện tại, rồi đệ quy các phần con bằng separator tiếp theo nếu độ dài vẫn vượt quá `chunk_size`. Base case là khi chuỗi đủ ngắn dể chấp nhận (nhỏ hơn `chunk_size`) hoặc khi mảng separators rỗng thì fallback sang cắt chính xác `chunk_size` ký tự. Cuối cùng, các phần hợp lệ được gộp/merge dần lại vào một mảng `chunks` để tối đa hóa chiều dài nội dung mỗi chunk nhưng vẫn nhỏ hơn `chunk_size`.
 
 ### EmbeddingStore
 
 **`add_documents` + `search`** — approach:
-> *Viết 2-3 câu: lưu trữ thế nào? Tính similarity ra sao?*
+> Hàm `add_documents` sẽ trích xuất thông tin, format `metadata` (inject thêm `doc_id` bằng id nguyên bản để dễ truy vết) rồi sử dụng `self._embedding_fn` sinh list embedding và lưu toàn bộ vào Chroma collection (`ids`, `documents`, `metadatas`, `embeddings`). Hàm `search` query Chroma collection nhận được dictionary `results`. Hàm sau đó normalize các `distances` trả ra (có the là L2) thành similarity score bằng phép tính `1.0 - distances[i]`, format kết quả dưới dạng mảng các dictionary object và giới hạn theo `top_k`.
 
 **`search_with_filter` + `delete_document`** — approach:
-> *Viết 2-3 câu: filter trước hay sau? Delete bằng cách nào?*
+> Hàm `search_with_filter` áp dụng cơ chế lọc trên DB-level thông qua việc đưa `metadata_filter` vào tham số `where=` của hàm query ChromaDB (lọc diễn ra tự động trước khi xếp hạng). Hàm `delete_document` gọi hàm `delete` của collection với filter `where={"doc_id": doc_id}` để xoá gọn các chunks của văn bản tương ứng và đối chiếu `count()` thay đổi để return true.
 
 ### KnowledgeBaseAgent
 
 **`answer`** — approach:
-> *Viết 2-3 câu: prompt structure? Cách inject context?*
+> Agent sử dụng instance của class `EmbeddingStore` để gọi hàm `search()` lấy danh sách top_k chunks tương đồng nhất với `question`. Đoạn code lặp qua dictionary extract các field `"content"` để append vào nhau với ngắt dòng `\n\n`. Chuỗi context rút gọn này cộng thêm prompt `question` cuối sau đó được nhét vào hàm `llm_fn(prompt)` để model tham khảo và trả lời.
 
 ### Test Results
+```
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /home/lam/code/2A202600270-PhamTranThanhLam-Day07/.conda/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /home/lam/code/2A202600270-PhamTranThanhLam-Day07
+plugins: anyio-4.13.0
+collecting ... collected 42 items
+
+tests/test_solution.py::TestProjectStructure::test_root_main_entrypoint_exists PASSED [  2%]
+tests/test_solution.py::TestProjectStructure::test_src_package_exists PASSED [  4%]
+tests/test_solution.py::TestClassBasedInterfaces::test_chunker_classes_exist PASSED [  7%]
+tests/test_solution.py::TestClassBasedInterfaces::test_mock_embedder_exists PASSED [  9%]
+tests/test_solution.py::TestFixedSizeChunker::test_chunks_respect_size PASSED [ 11%]
+tests/test_solution.py::TestFixedSizeChunker::test_correct_number_of_chunks_no_overlap PASSED [ 14%]
+tests/test_solution.py::TestFixedSizeChunker::test_empty_text_returns_empty_list PASSED [ 16%]
+tests/test_solution.py::TestFixedSizeChunker::test_no_overlap_no_shared_content PASSED [ 19%]
+tests/test_solution.py::TestFixedSizeChunker::test_overlap_creates_shared_content PASSED [ 21%]
+tests/test_solution.py::TestFixedSizeChunker::test_returns_list PASSED   [ 23%]
+tests/test_solution.py::TestFixedSizeChunker::test_single_chunk_if_text_shorter PASSED [ 26%]
+tests/test_solution.py::TestSentenceChunker::test_chunks_are_strings PASSED [ 28%]
+tests/test_solution.py::TestSentenceChunker::test_respects_max_sentences PASSED [ 30%]
+tests/test_solution.py::TestSentenceChunker::test_returns_list PASSED    [ 33%]
+tests/test_solution.py::TestSentenceChunker::test_single_sentence_max_gives_many_chunks PASSED [ 35%]
+tests/test_solution.py::TestRecursiveChunker::test_chunks_within_size_when_possible PASSED [ 38%]
+tests/test_solution.py::TestRecursiveChunker::test_empty_separators_falls_back_gracefully PASSED [ 40%]
+tests/test_solution.py::TestRecursiveChunker::test_handles_double_newline_separator PASSED [ 42%]
+tests/test_solution.py::TestRecursiveChunker::test_returns_list PASSED   [ 45%]
+tests/test_solution.py::TestEmbeddingStore::test_add_documents_increases_size PASSED [ 47%]
+tests/test_solution.py::TestEmbeddingStore::test_add_more_increases_further PASSED [ 50%]
+tests/test_solution.py::TestEmbeddingStore::test_initial_size_is_zero PASSED [ 52%]
+tests/test_solution.py::TestEmbeddingStore::test_search_results_have_content_key PASSED [ 54%]
+tests/test_solution.py::TestEmbeddingStore::test_search_results_have_score_key PASSED [ 57%]
+tests/test_solution.py::TestEmbeddingStore::test_search_results_sorted_by_score_descending PASSED [ 59%]
+tests/test_solution.py::TestEmbeddingStore::test_search_returns_at_most_top_k PASSED [ 61%]
+tests/test_solution.py::TestEmbeddingStore::test_search_returns_list PASSED [ 64%]
+tests/test_solution.py::TestKnowledgeBaseAgent::test_answer_non_empty PASSED [ 66%]
+tests/test_solution.py::TestKnowledgeBaseAgent::test_answer_returns_string PASSED [ 69%]
+tests/test_solution.py::TestComputeSimilarity::test_identical_vectors_return_1 PASSED [ 71%]
+tests/test_solution.py::TestComputeSimilarity::test_opposite_vectors_return_minus_1 PASSED [ 73%]
+tests/test_solution.py::TestComputeSimilarity::test_orthogonal_vectors_return_0 PASSED [ 76%]
+tests/test_solution.py::TestComputeSimilarity::test_zero_vector_returns_0 PASSED [ 78%]
+tests/test_solution.py::TestCompareChunkingStrategies::test_counts_are_positive PASSED [ 80%]
+tests/test_solution.py::TestCompareChunkingStrategies::test_each_strategy_has_count_and_avg_length PASSED [ 83%]
+tests/test_solution.py::TestCompareChunkingStrategies::test_returns_three_strategies PASSED [ 85%]
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_filter_by_department PASSED [ 88%]
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_no_filter_returns_all_candidates PASSED [ 90%]
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_returns_at_most_top_k PASSED [ 92%]
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_reduces_collection_size PASSED [ 95%]
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_false_for_nonexistent_doc PASSED [ 97%]
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_true_for_existing_doc PASSED [100%]
+
+============================== 42 passed in 0.52s ==============================
 
 ```
-# Paste output of: pytest tests/ -v
-```
 
-**Số tests pass:** __ / __
+**Số tests pass:** 42 / 42
 
 ---
 

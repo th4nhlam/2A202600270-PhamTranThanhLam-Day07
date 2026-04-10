@@ -19,12 +19,11 @@ from src.models import Document
 from src.store import EmbeddingStore
 
 SAMPLE_FILES = [
-    "data/python_intro.txt",
-    "data/vector_store_notes.md",
-    "data/rag_system_design.md",
-    "data/customer_support_playbook.txt",
-    "data/chunking_experiment_report.md",
-    "data/vi_retrieval_notes.md",
+    "docs/incoterms_intro.md",
+    "docs/incoterms_any_mode_rules.md",
+    "docs/incoterms_obligations_ab.md",
+    "docs/incoterms_risk_cost_focus.md",
+    "docs/incoterms_sea_rules.md",
 ]
 
 
@@ -84,7 +83,7 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
         print(f"  - {doc.id}: {doc.metadata['source']}")
 
     load_dotenv(override=False)
-    provider = os.getenv(EMBEDDING_PROVIDER_ENV, "mock").strip().lower()
+    provider = os.getenv(EMBEDDING_PROVIDER_ENV, "local").strip().lower()
     if provider == "local":
         try:
             embedder = LocalEmbedder(model_name=os.getenv("LOCAL_EMBEDDING_MODEL", LOCAL_EMBEDDING_MODEL))
