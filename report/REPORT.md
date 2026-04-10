@@ -206,14 +206,14 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 | Pair | Sentence A | Sentence B | Dự đoán | Actual Score | Đúng? |
 |------|-----------|-----------|---------|--------------|-------|
-| 1 | | | high / low | | |
-| 2 | | | high / low | | |
-| 3 | | | high / low | | |
-| 4 | | | high / low | | |
-| 5 | | | high / low | | |
+| 1 | The seller pays for sea freight under CIF. | Under CIF terms, the seller is responsible for the cost of ocean transport. | high | 0.8319 | Đúng |
+| 2 | EXW means the buyer handles all transport. | DDP requires the seller to handle all logistics and duties. | low | 0.3842 | Đúng |
+| 3 | Incoterms 2020 are published by the ICC. | International Chamber of Commerce created the Incoterms rules. | high | 0.4896 | Đúng |
+| 4 | The risk transfers to the buyer when goods are loaded on the ship in FOB. | What is the capital of France? | low | -0.0385 | Đúng |
+| 5 | FCA can be used for any mode of transport. | FOB is strictly for sea or inland waterway transport. | low | 0.5600 | Sai |
 
 **Kết quả nào bất ngờ nhất? Điều này nói gì về cách embeddings biểu diễn nghĩa?**
-> *Viết 2-3 câu:*
+> *Viết 2-3 câu:* Kết quả bất ngờ nhất là cặp số 5 với độ tương đồng lên tới 0.5600, mặc dù nội dung đang hướng đến sự đối lập giữa hai quy tắc khác nhau. Điều này cho thấy văn bản được biểu diễn mạnh theo các cụm từ khóa có chung ngữ cảnh như "transport", "mode", "sea", "FOB". Do đó, các embedding vector đôi khi gặp khó khăn trong việc phân biệt các câu mang sắc thái phủ định hoặc mang ý nghĩa trái ngược nhau nếu chúng dùng chung nhiều từ vựng.
 
 ---
 
@@ -225,36 +225,36 @@ Chạy 5 benchmark queries của nhóm trên implementation cá nhân của bạ
 
 | # | Query | Gold Answer |
 |---|-------|-------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | What are the obligations of the seller under EXW? | Người bán chỉ cần đặt hàng hóa dưới quyền định đoạt của người mua tại cơ sở của người bán. |
+| 2 | Does CIF apply to air transport? | Không, CIF chỉ dành riêng cho vận tải biển và đường thủy nội địa. |
+| 3 | Who is responsible for unloading goods at the destination under DPU? | Người bán chịu trách nhiệm và chi phí dỡ hàng tại điểm đến. |
+| 4 | At what point does risk transfer from seller to buyer in FOB? | Rủi ro chuyển giao khi hàng hóa được giao lên tàu do người mua chỉ định. |
+| 5 | Are Incoterms legally binding contracts on their own? | Không, các quy tắc Incoterms không phải là hợp đồng pháp lý hoàn chỉnh mà cần lồng ghép vào hợp đồng mua bán tự nhiên. |
 
 ### Kết Quả Của Tôi
 
 | # | Query | Top-1 Retrieved Chunk (tóm tắt) | Score | Relevant? | Agent Answer (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | What are the obligations of the seller under EXW? | Incoterms 2020 - Rules for Any Mode(s) of Transport: EXW details... | 0.54 | Yes | Người bán phải sắp xếp hàng tại điểm hẹn, không chịu trách nhiệm bốc hàng. |
+| 2 | Does CIF apply to air transport? | Incoterms 2020 - Sea and Inland Waterway Rules: CIF details... | 0.49 | Yes | CIF chỉ áp dụng cho vận tải biển hoặc thủy nội địa. |
+| 3 | Who is responsible for unloading goods at the destination under DPU? | Incoterms 2020 - Rules for Any Mode(s) of Transport: DPU details... | 0.47 | Yes | Người bán chịu trách nhiệm dỡ hàng tại điểm đến đã thoả thuận. |
+| 4 | At what point does risk transfer from seller to buyer in FOB? | Incoterms 2020 - Sea and Inland Waterway Rules: FOB details... | 0.56 | Yes | Chuyển rủi ro khi hàng đi qua lan can tàu hoặc được đặt lên tàu. |
+| 5 | Are Incoterms legally binding contracts on their own? | Incoterms 2020 - Introduction Notes... | 0.39 | Yes | Incoterms không thay thế cho hợp đồng mua bán đầy đủ, nó chỉ bổ sung. |
 
-**Bao nhiêu queries trả về chunk relevant trong top-3?** __ / 5
+**Bao nhiêu queries trả về chunk relevant trong top-3?** 5 / 5
 
 ---
 
 ## 7. What I Learned (5 điểm — Demo)
 
 **Điều hay nhất tôi học được từ thành viên khác trong nhóm:**
-> *Viết 2-3 câu:*
+> *Viết 2-3 câu:* Tôi học được cách sử dụng `RecursiveChunker` từ bạn cùng nhóm với việc setup các separator theo cấp độ heading của markdown. Việc này giữ cho các điều luật không bị cắt làm đôi, giúp bảo toàn trọn vẹn ngữ cảnh của văn bản pháp lý.
 
 **Điều hay nhất tôi học được từ nhóm khác (qua demo):**
-> *Viết 2-3 câu:*
+> *Viết 2-3 câu:* Nhóm bạn làm về y khoa có ý tưởng thêm metadata là "độ khó của bài báo" giúp agent có thể trả lời các mức độ học thuật chuẩn xác hơn dựa vào cách biểu diễn của query. Concept *metadata pre-filtering* này rất sáng tạo và hữu hiệu cho các domain kiến thức đa dạng.
 
 **Nếu làm lại, tôi sẽ thay đổi gì trong data strategy?**
-> *Viết 2-3 câu:*
+> *Viết 2-3 câu:* Nếu làm lại, tôi sẽ cấu hình chunk size lớn hơn kết hợp với một tỷ lệ overlap đủ sâu để phòng ngừa hiện tượng ngữ cảnh bị phân tán. Ngoài ra, tôi sẽ gán thêm các keyword/term chuyên ngành vào metadata hoặc đầu mỗi chunk để giúp Vector Database tìm kiếm chính xác hơn cho từng câu hỏi nhất định.
 
 ---
 
@@ -262,12 +262,12 @@ Chạy 5 benchmark queries của nhóm trên implementation cá nhân của bạ
 
 | Tiêu chí | Loại | Điểm tự đánh giá |
 |----------|------|-------------------|
-| Warm-up | Cá nhân | / 5 |
-| Document selection | Nhóm | / 10 |
-| Chunking strategy | Nhóm | / 15 |
-| My approach | Cá nhân | / 10 |
-| Similarity predictions | Cá nhân | / 5 |
-| Results | Cá nhân | / 10 |
-| Core implementation (tests) | Cá nhân | / 30 |
-| Demo | Nhóm | / 5 |
-| **Tổng** | | **/ 100** |
+| Warm-up | Cá nhân | 5/ 5 |
+| Document selection | Nhóm | 10/ 10 |
+| Chunking strategy | Nhóm | 13/ 15 |
+| My approach | Cá nhân | 8 / 10 |
+| Similarity predictions | Cá nhân | 4/ 5 |
+| Results | Cá nhân | 10 / 10 |
+| Core implementation (tests) | Cá nhân | 30 / 30 |
+| Demo | Nhóm | 4 / 5 |
+| **Tổng** | | **84/ 100** |

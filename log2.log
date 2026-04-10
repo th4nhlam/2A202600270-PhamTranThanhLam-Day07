@@ -1,0 +1,66 @@
+=== Manual File Test ===
+Accepted file types: .md, .txt
+Input file list:
+  - docs/incoterms_intro.md
+  - docs/incoterms_any_mode_rules.md
+  - docs/incoterms_obligations_ab.md
+  - docs/incoterms_risk_cost_focus.md
+  - docs/incoterms_sea_rules.md
+
+Loaded 5 documents
+  - incoterms_intro: docs/incoterms_intro.md
+  - incoterms_any_mode_rules: docs/incoterms_any_mode_rules.md
+  - incoterms_obligations_ab: docs/incoterms_obligations_ab.md
+  - incoterms_risk_cost_focus: docs/incoterms_risk_cost_focus.md
+  - incoterms_sea_rules: docs/incoterms_sea_rules.md
+
+Embedding backend: all-MiniLM-L6-v2
+
+Stored 5 documents in EmbeddingStore
+
+=== EmbeddingStore Search Test ===
+Query: CIF requires insurance by seller.
+1. score=0.526 source=docs/incoterms_any_mode_rules.md
+   content preview: # Incoterms 2020 - Rules for Any Mode(s) of Transport  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Languag...
+2. score=0.472 source=docs/incoterms_sea_rules.md
+   content preview: # Incoterms 2020 - Sea and Inland Waterway Rules  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: En...
+3. score=0.354 source=docs/incoterms_intro.md
+   content preview: # Incoterms 2020 - Introduction Notes  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Domai...
+
+=== KnowledgeBaseAgent Test ===
+Question: CIF requires insurance by seller.
+Agent answer:
+[DEMO LLM] Generated answer from prompt preview: # Incoterms 2020 - Rules for Any Mode(s) of Transport  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Domain: Incoterms Section: any_mode  ## Included rules  - EXW (Ex Works) - FCA (Free Carrier) - CPT (Carriage Paid To) - CIP (Carriage and Insurance Paid To) - DAP (Delivered at Place) - DPU (Delivered at Place Unloaded) - DDP (Delivered Duty Paid)  ## Key notes by rul...
+=== Manual File Test ===
+Accepted file types: .md, .txt
+Input file list:
+  - docs/incoterms_intro.md
+  - docs/incoterms_any_mode_rules.md
+  - docs/incoterms_obligations_ab.md
+  - docs/incoterms_risk_cost_focus.md
+  - docs/incoterms_sea_rules.md
+
+Loaded 5 documents
+  - incoterms_intro: docs/incoterms_intro.md
+  - incoterms_any_mode_rules: docs/incoterms_any_mode_rules.md
+  - incoterms_obligations_ab: docs/incoterms_obligations_ab.md
+  - incoterms_risk_cost_focus: docs/incoterms_risk_cost_focus.md
+  - incoterms_sea_rules: docs/incoterms_sea_rules.md
+
+Embedding backend: all-MiniLM-L6-v2
+
+Stored 5 documents in EmbeddingStore
+
+=== EmbeddingStore Search Test ===
+Query: Which Incoterms rule is the only one requiring the seller to unload goods at destination?
+1. score=0.609 source=docs/incoterms_any_mode_rules.md
+   content preview: # Incoterms 2020 - Rules for Any Mode(s) of Transport  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Languag...
+2. score=0.500 source=docs/incoterms_sea_rules.md
+   content preview: # Incoterms 2020 - Sea and Inland Waterway Rules  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: En...
+3. score=0.488 source=docs/incoterms_risk_cost_focus.md
+   content preview: # Incoterms 2020 - Risk and Cost Focus  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Doma...
+
+=== KnowledgeBaseAgent Test ===
+Question: Which Incoterms rule is the only one requiring the seller to unload goods at destination?
+Agent answer:
+[DEMO LLM] Generated answer from prompt preview: # Incoterms 2020 - Rules for Any Mode(s) of Transport  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Domain: Incoterms Section: any_mode  ## Included rules  - EXW (Ex Works) - FCA (Free Carrier) - CPT (Carriage Paid To) - CIP (Carriage and Insurance Paid To) - DAP (Delivered at Place) - DPU (Delivered at Place Unloaded) - DDP (Delivered Duty Paid)  ## Key notes by rul...

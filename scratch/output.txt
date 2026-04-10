@@ -1,0 +1,58 @@
+=== PART 5: Similarity Predictions ===
+A: The seller pays for sea freight under CIF.
+B: Under CIF terms, the seller is responsible for the cost of ocean transport.
+Pred: high | Score: 0.8319
+
+A: EXW means the buyer handles all transport.
+B: DDP requires the seller to handle all logistics and duties.
+Pred: low | Score: 0.3842
+
+A: Incoterms 2020 are published by the ICC.
+B: International Chamber of Commerce created the Incoterms rules.
+Pred: high | Score: 0.4896
+
+A: The risk transfers to the buyer when goods are loaded on the ship in FOB.
+B: What is the capital of France?
+Pred: low | Score: -0.0385
+
+A: FCA can be used for any mode of transport.
+B: FOB is strictly for sea or inland waterway transport.
+Pred: low | Score: 0.5600
+
+=== PART 6: Results ===
+
+Query: What are the obligations of the seller under EXW?
+Top Chunk: # Incoterms 2020 - Rules for Any Mode(s) of Transport
+
+Source: ICC Incoterms 2020 (compiled from `in...
+Score: 0.5426
+Agent: [DEMO LLM] Answer based on context.
+
+Query: Does CIF apply to air transport?
+Top Chunk: # Incoterms 2020 - Sea and Inland Waterway Rules
+
+Source: ICC Incoterms 2020 (compiled from `incorte...
+Score: 0.4953
+Agent: [DEMO LLM] Answer based on context.
+
+Query: Who is responsible for unloading goods at the destination under DPU?
+Top Chunk: # Incoterms 2020 - Rules for Any Mode(s) of Transport
+
+Source: ICC Incoterms 2020 (compiled from `in...
+Score: 0.4733
+Agent: [DEMO LLM] Answer based on context.
+
+Query: At what point does risk transfer from seller to buyer in FOB?
+Top Chunk: # Incoterms 2020 - Sea and Inland Waterway Rules
+
+Source: ICC Incoterms 2020 (compiled from `incorte...
+Score: 0.5604
+Agent: [DEMO LLM] Answer based on context.
+
+Query: Are Incoterms legally binding contracts on their own?
+Top Chunk: # Incoterms 2020 - Introduction Notes
+
+Source: ICC Incoterms 2020 (compiled from `incorterm.md`)
+Lan...
+Score: 0.3927
+Agent: [DEMO LLM] Answer based on context.

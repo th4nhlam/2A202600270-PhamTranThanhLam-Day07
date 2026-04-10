@@ -1,0 +1,33 @@
+=== Manual File Test ===
+Accepted file types: .md, .txt
+Input file list:
+  - docs/incoterms_intro.md
+  - docs/incoterms_any_mode_rules.md
+  - docs/incoterms_obligations_ab.md
+  - docs/incoterms_risk_cost_focus.md
+  - docs/incoterms_sea_rules.md
+
+Loaded 5 documents
+  - incoterms_intro: docs/incoterms_intro.md
+  - incoterms_any_mode_rules: docs/incoterms_any_mode_rules.md
+  - incoterms_obligations_ab: docs/incoterms_obligations_ab.md
+  - incoterms_risk_cost_focus: docs/incoterms_risk_cost_focus.md
+  - incoterms_sea_rules: docs/incoterms_sea_rules.md
+
+Embedding backend: all-MiniLM-L6-v2
+
+Stored 5 documents in EmbeddingStore
+
+=== EmbeddingStore Search Test ===
+Query: What do Incoterms 2020 rules mainly regulate between seller and buyer?
+1. score=0.571 source=docs/incoterms_intro.md
+   content preview: # Incoterms 2020 - Introduction Notes  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Domai...
+2. score=0.526 source=docs/incoterms_any_mode_rules.md
+   content preview: # Incoterms 2020 - Rules for Any Mode(s) of Transport  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Languag...
+3. score=0.436 source=docs/incoterms_sea_rules.md
+   content preview: # Incoterms 2020 - Sea and Inland Waterway Rules  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: En...
+
+=== KnowledgeBaseAgent Test ===
+Question: What do Incoterms 2020 rules mainly regulate between seller and buyer?
+Agent answer:
+[DEMO LLM] Generated answer from prompt preview: # Incoterms 2020 - Introduction Notes  Source: ICC Incoterms 2020 (compiled from `incorterm.md`) Language: English Domain: Incoterms Section: introduction  ## What Incoterms 2020 do  Incoterms rules define a common interpretation of trade terms used in sale contracts. They mainly clarify:  - obligations of seller and buyer - where and when risk transfers - how costs are allocated between parties  ...
